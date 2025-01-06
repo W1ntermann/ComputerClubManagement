@@ -1,0 +1,106 @@
+namespace ComputerClub;
+
+public class ComputerClubb
+{
+    private List<Computer> _computers = new List<Computer>();
+    private Queue<Client> _clients = new Queue<Client>();
+    private int _clubBalance = 0;
+
+    public ComputerClubb(int computersCount)
+    {
+        Random random = new Random();
+
+        for (int i = 0; i < computersCount; i++)
+        {
+            _computers.Add(new Computer(random.Next(5, 15)));
+        }
+        
+        CreateNewClient(25, random);
+    }
+
+    public void CreateNewClient(int clientCount, Random random)
+    {
+        for (int i = 0; i < clientCount; i++)
+        {
+            _clients.Enqueue(new Client(random.Next(100, 250), random));
+        }
+    }
+
+    public void Work()
+    {
+        while (_clients.Count > 0)
+        {
+            Client newClient = _clients.Dequeue();
+            
+            Console.WriteLine($"Our balance is : {_clubBalance} dollars");
+            
+            Console.WriteLine("Welcome to our Computer Club");
+            
+            Console.WriteLine($"We have a new client and he would like to buy a {newClient.DesiredMinutes}");
+            
+            ShowAllComputerStates();
+
+
+            Console.WriteLine($"You offer the computer by the number : ");
+
+            string userInput = Console.ReadLine();
+
+            if (int.TryParse(userInput, out int computerNumber))
+            {
+                computerNumber -= 1;
+
+                if (computerNumber >= 0 && computerNumber < _computers.Count)
+                {
+                    if (_computers[computerNumber]._isTaken)
+                    {
+                        Console.WriteLine("The computer is occupied !");
+                    }
+                    else
+                    {
+                        if (newClient.CheckSoInvency(_computers[computerNumber]))
+                        {
+                            Console.WriteLine($"Payment successful and he sit on {computerNumber}");
+                            _clubBalance += newClient.Pay();
+                            _computers[computerNumber].BecomeTaken(newClient);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Not enough money");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("He is gonna go");
+                }
+            }
+            else
+            {
+                CreateNewClient(1, new Random());
+                Console.WriteLine("Wrong enter, try again");
+            }
+            
+            Console.ReadKey();
+            
+            Console.Clear();
+        }
+    }
+
+    public void ShowAllComputerStates()
+    {
+        Console.WriteLine("List of all computers");
+        for (int i = 0; i < _computers.Count; i++)
+        {
+            Console.WriteLine(i + 1 + " - ");
+            _computers[i].ShowState();
+        }
+    }
+
+    public void SpendOneMinute()
+    {
+        foreach (var computer in _computers)
+        {
+            computer.SpendTime();
+        }
+    }
+}
